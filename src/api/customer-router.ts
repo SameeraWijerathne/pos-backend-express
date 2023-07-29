@@ -13,3 +13,14 @@ let datasource: Pool;
         password: 'mysql'
     });
 })();
+
+/* get Customers */
+router.get('/', async (req, res) => {
+    let query = "%";
+    if (req.query.q) {
+        query = `%${req.query.q}%`
+    }
+    const resultSet = await datasource.query(`SELECT * FROM customer WHERE id LIKE ? OR name LIKE ? OR address LIKE ? OR contact LIKE ?`,
+        new Array(4).fill(query));
+    res.json(resultSet);
+});
