@@ -24,3 +24,9 @@ router.get('/', async (req, res) => {
         new Array(4).fill(query));
     res.json(resultSet);
 });
+
+router.delete('/:customerId', async (req, res) =>{
+    const result = await datasource.query('DELETE FROM customer WHERE id = ?', [req.params.customerId]);
+    if (result.affectedRows === 1) res.sendStatus(204);
+    else res.sendStatus(404);
+});
