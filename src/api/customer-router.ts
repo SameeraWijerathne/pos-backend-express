@@ -14,6 +14,31 @@ let datasource: Pool;
     });
 })();
 
+type Customer = {
+    id: number, name: string, address: string, contact: string
+}
+
+/* save Customer */
+router.post('/', async (req, res) => {
+    const customer = req.body as Customer;
+    if (!customer.name || !customer.address || !customer.contact) {
+        res.status(400).send("Invalid data");
+    } else {
+        try {
+            const result = await datasource.query('INSERT INTO customer (name, address, contact) VALUES (?,?,?)',
+                [customer.name, customer.address, customer.contact]);
+            customer.id = result.insertId;
+            res.status(201).json(customer);
+        } catch (err: any) {
+            if (err.sqlState === '23000') {
+                res.status(409).send("Contact number already exists");
+            } else {
+                throw err;
+            }
+        }
+    }
+});
+
 /* get Customers */
 router.get('/', async (req, res) => {
     let query = "%";
@@ -25,6 +50,7 @@ router.get('/', async (req, res) => {
     res.json(resultSet);
 });
 
+/* delete Customer */
 router.delete('/:customerId', async (req, res) =>{
     const result = await datasource.query('DELETE FROM customer WHERE id = ?', [req.params.customerId]);
     if (result.affectedRows === 1) res.sendStatus(204);
